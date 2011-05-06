@@ -1,0 +1,27 @@
+[general]
+request_classifier = repoze.who.classifiers:default_request_classifier
+challenge_decider = repoze.who.classifiers:default_challenge_decider
+
+[plugin:auth_tkt]
+# identification
+use = repoze.who.plugins.auth_tkt:make_plugin
+secret = s33kr1t
+cookie_name = foobar
+secure = False
+include_ip = False
+
+[plugin:tequila]
+# identification, challenge and authentication
+use = repoze.who.plugins.tequila:make_plugin
+tequila_url = https://www.example.com/cgi-bin/tequila
+service = My service
+rememberer_name = auth_tkt
+
+[identifiers]
+plugins = tequila auth_tkt
+
+[challengers]
+plugins = tequila
+
+[authenticators]
+plugins = tequila
