@@ -7,6 +7,7 @@ setup(name='repoze.who.plugins.tequila',
       packages=find_packages(),
       zip_safe=False,
       install_requires=[
+        'Paste',
         'webob'
       ],
 )

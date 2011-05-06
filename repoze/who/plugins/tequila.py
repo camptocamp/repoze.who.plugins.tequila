@@ -3,9 +3,11 @@ from urllib2 import urlopen
 from paste.httpexceptions import HTTPFound
 
 class TequilaChallengerPlugin(object):
-    def __init__(self, tequila_url, service, rememberer_name):
+    def __init__(self, tequila_url, service, request, rememberer_name):
         self.tequila_url = tequila_url
+        self.request = request
         self.service = service
+
         self.rememberer_name = rememberer_name
 
     def _tequila_request(self, action, data):
@@ -35,7 +37,7 @@ class TequilaChallengerPlugin(object):
         params = {
             'urlaccess': Request(environ).path_url,
             'service': self.service,
-            'request': 'name'
+            'request': self.request
         }
         response = self._tequila_request('/createrequest', params)
         redirect = self.tequila_url + "/requestauth?requestkey=%s"%response.get('key')
@@ -51,9 +53,10 @@ class TequilaChallengerPlugin(object):
 
 def make_plugin(tequila_url='https://tequila.epfl.ch/cgi-bin/tequila',
                 service='Unknown service',
+                request='uniqueid,name,firstname',
                 rememberer_name=None):
 
     if rememberer_name is None:
         raise ValueError('must include rememberer key (name of another IIdentifier plugin)')
 
-    return TequilaChallengerPlugin(tequila_url, service, rememberer_name)
+    return TequilaChallengerPlugin(tequila_url, service, request, rememberer_name)
