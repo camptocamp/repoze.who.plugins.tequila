@@ -6,6 +6,9 @@ setup(name='repoze.who.plugins.tequila',
       author_email='frederic.junod@camptocamp.com',
       packages=find_packages(),
       zip_safe=False,
+      install_requires=[
+        'webob'
+      ],
 )
 
 
