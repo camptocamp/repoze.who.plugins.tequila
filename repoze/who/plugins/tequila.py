@@ -18,14 +18,15 @@ def tequila_request(url, action, data):
 class TequilaChallengerPlugin(object):
 
     def __init__(self, tequila_url, service, request, rememberer_name,
-                 logout_handler_path, login_handler_path):
+                 login_handler_path, logout_handler_path, logged_out_url):
         self.tequila_url = tequila_url
         self.request = request
         self.service = service
         self.rememberer_name = rememberer_name
 
-        self.logout_handler_path = logout_handler_path
         self.login_handler_path = login_handler_path
+        self.logout_handler_path = logout_handler_path
+        self.logged_out_url = logged_out_url
 
     # IIdentifier
     def identify(self, environ):
@@ -35,7 +36,9 @@ class TequilaChallengerPlugin(object):
 
         if request.path == self.logout_handler_path:
             headers = self.forget(environ, {})
-            # fixme redirect
+            headers.append(('Location', self.logged_out_url))
+            environ['repoze.who.application'] = HTTPFound(headers=headers)
+
         elif request.path == self.login_handler_path:
             # back from the challenger, authenticate the key
             key = request.params.get('key')
@@ -77,11 +80,12 @@ def make_plugin(tequila_url='https://tequila.epfl.ch/cgi-bin/tequila',
                 service='Unknown service',
                 request='uniqueid,name,firstname',
                 rememberer_name=None,
+                login_handler_path='/do_login',
                 logout_handler_path='/logout',
-                login_handler_path='/do_login'):
+                logged_out_url='/'):
 
     if rememberer_name is None:
         raise ValueError('must include rememberer key (name of another IIdentifier plugin)')
 
     return TequilaChallengerPlugin(tequila_url, service, request, rememberer_name, 
-                                   logout_handler_path, login_handler_path)
+                                   login_handler_path, logout_handler_path, logged_out_url)

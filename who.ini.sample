@@ -18,6 +18,7 @@ service = My service
 request = uniqueid,name,firstname,allunits,username
 rememberer_name = auth_tkt
 logout_handler_path = /logout
+logged_out_url = /
 
 [identifiers]
 plugins = tequila auth_tkt
