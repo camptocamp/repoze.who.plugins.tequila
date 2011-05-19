@@ -17,6 +17,7 @@ tequila_url = https://www.example.com/cgi-bin/tequila
 service = My service
 request = uniqueid,name,firstname,allunits,username
 rememberer_name = auth_tkt
+logout_handler_path = /logout
 
 [identifiers]
 plugins = tequila auth_tkt
