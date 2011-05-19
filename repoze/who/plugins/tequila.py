@@ -2,9 +2,6 @@ from webob import Request, Response
 from urllib2 import urlopen, HTTPError
 from paste.httpexceptions import HTTPFound
 
-import logging
-logger = logging.getLogger()
-
 def tequila_request(url, action, data):
     body = '\n'.join(["%s=%s"%(k,v) for k,v in data.iteritems()])
     try:
