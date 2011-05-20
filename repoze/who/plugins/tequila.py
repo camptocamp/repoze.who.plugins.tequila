@@ -8,18 +8,19 @@ def tequila_request(url, action, data):
         response = urlopen(url + action, body)
     except HTTPError:
         return None
-    
+
     body = response.read()
     return dict([tuple(line.split('=', 1)) for line in body.split('\n') if line])
 
 class TequilaChallengerPlugin(object):
 
-    def __init__(self, tequila_url, service, request, rememberer_name,
+    def __init__(self, tequila_url, service, request, rememberer_name, session_name,
                  login_handler_path, logout_handler_path, logged_out_url):
         self.tequila_url = tequila_url
         self.request = request
         self.service = service
         self.rememberer_name = rememberer_name
+        self.session_name = session_name
 
         self.login_handler_path = login_handler_path
         self.logout_handler_path = logout_handler_path
@@ -28,11 +29,10 @@ class TequilaChallengerPlugin(object):
     # IIdentifier
     def identify(self, environ):
         request = Request(environ)
-
         identity = {}
 
         if request.path == self.logout_handler_path:
-            headers = self.forget(environ, {})
+            headers = self.forget(environ, [])
             headers.append(('Location', self.logged_out_url))
             environ['repoze.who.application'] = HTTPFound(headers=headers)
 
@@ -42,17 +42,35 @@ class TequilaChallengerPlugin(object):
             if key:
                 identity = tequila_request(self.tequila_url, '/fetchattributes', {'key': str(key)})
                 if identity is not None:
+                    identity['repoze.who.userid'] = identity.get('uniqueid')
                     environ['repoze.who.application'] = HTTPFound(headers=[('Location', self.came_from)])
+
+        elif not self.rememberer_name:
+            session = environ.get(self.session_name)
+            identity = session.get('repoze.who.plugins.tequila')
 
         return identity
 
     def remember(self, environ, identity):
-        rememberer = environ['repoze.who.plugins'][self.rememberer_name]
-        return rememberer.remember(environ, identity)
+        if self.rememberer_name:
+            rememberer = environ['repoze.who.plugins'][self.rememberer_name]
+            return rememberer.remember(environ, identity)
+        else:
+            session = environ.get(self.session_name)
+            session['repoze.who.plugins.tequila'] = identity
+            session.save()
+            return []
 
     def forget(self, environ, identity):
-        rememberer = environ['repoze.who.plugins'][self.rememberer_name]
-        return rememberer.forget(environ, identity)
+        if self.rememberer_name:
+            rememberer = environ['repoze.who.plugins'][self.rememberer_name]
+            return rememberer.forget(environ, identity)
+        else:
+            session = environ.get(self.session_name)
+            if 'repoze.who.plugins.tequila' in session:
+                del session['repoze.who.plugins.tequila']
+                session.save
+            return []
 
     # IChallenger
     def challenge(self, environ, status, app_headers, forget_headers):
@@ -77,12 +95,11 @@ def make_plugin(tequila_url='https://tequila.epfl.ch/cgi-bin/tequila',
                 service='Unknown service',
                 request='uniqueid,name,firstname',
                 rememberer_name=None,
+                session_name='beaker.session',
                 login_handler_path='/do_login',
                 logout_handler_path='/logout',
                 logged_out_url='/'):
 
-    if rememberer_name is None:
-        raise ValueError('must include rememberer key (name of another IIdentifier plugin)')
-
-    return TequilaChallengerPlugin(tequila_url, service, request, rememberer_name, 
+    return TequilaChallengerPlugin(tequila_url, service, request,
+                                   rememberer_name, session_name,
                                    login_handler_path, logout_handler_path, logged_out_url)

@@ -17,6 +17,7 @@ tequila_url = https://www.example.com/cgi-bin/tequila
 service = My service
 request = uniqueid,name,firstname,allunits,username
 rememberer_name = auth_tkt
+session_name = beaker.session
 logout_handler_path = /logout
 logged_out_url = /
 
