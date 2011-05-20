@@ -42,7 +42,7 @@ class TequilaChallengerPlugin(object):
             if key:
                 identity = tequila_request(self.tequila_url, '/fetchattributes', {'key': str(key)})
                 if identity is not None:
-                    environ['repoze.who.application'] = HTTPFound(headers=[('Location', self.origin)])
+                    environ['repoze.who.application'] = HTTPFound(headers=[('Location', self.came_from)])
 
         return identity
 
@@ -57,7 +57,7 @@ class TequilaChallengerPlugin(object):
     # IChallenger
     def challenge(self, environ, status, app_headers, forget_headers):
         request = Request(environ)
-        self.origin = request.path_url
+        self.came_from = request.path_url
         params = {
             'urlaccess': request.relative_url(self.login_handler_path),
             'service': self.service,
