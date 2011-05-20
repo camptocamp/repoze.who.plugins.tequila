@@ -1,4 +1,5 @@
 from webob import Request, Response
+from urlparse import urljoin
 from urllib2 import urlopen, HTTPError
 from paste.httpexceptions import HTTPFound
 
@@ -31,12 +32,12 @@ class TequilaChallengerPlugin(object):
         request = Request(environ)
         identity = {}
 
-        if request.path == self.logout_handler_path:
+        if request.path == urljoin(request.path, self.logout_handler_path):
             headers = self.forget(environ, [])
             headers.append(('Location', self.logged_out_url))
             environ['repoze.who.application'] = HTTPFound(headers=headers)
 
-        elif request.path == self.login_handler_path:
+        elif request.path == urljoin(request.path, self.login_handler_path):
             # back from the challenger, authenticate the key
             key = request.params.get('key')
             if key:
