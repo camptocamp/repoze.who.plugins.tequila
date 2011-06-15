@@ -15,11 +15,13 @@ def tequila_request(url, action, data):
 
 class TequilaChallengerPlugin(object):
 
-    def __init__(self, tequila_url, service, request, rememberer_name, session_name,
-                 login_handler_path, logout_handler_path, logged_out_url):
+    def __init__(self, tequila_url, service, request, allows, 
+                 rememberer_name, session_name, login_handler_path, 
+                 logout_handler_path, logged_out_url):
         self.tequila_url = tequila_url
         self.request = request
         self.service = service
+        self.allows = allows
         self.rememberer_name = rememberer_name
         self.session_name = session_name
 
@@ -82,6 +84,9 @@ class TequilaChallengerPlugin(object):
             'service': self.service,
             'request': self.request
         }
+        if self.allows is not None:
+            params.update({'allows': self.allows})
+
         response = tequila_request(self.tequila_url, '/createrequest', params)
         redirect = self.tequila_url + "/requestauth?requestkey=%s"%response.get('key')
 
@@ -95,12 +100,13 @@ class TequilaChallengerPlugin(object):
 def make_plugin(tequila_url='https://tequila.epfl.ch/cgi-bin/tequila',
                 service='Unknown service',
                 request='uniqueid,name,firstname',
+                allows=None,
                 rememberer_name=None,
                 session_name='beaker.session',
                 login_handler_path='/do_login',
                 logout_handler_path='/logout',
                 logged_out_url='/'):
 
-    return TequilaChallengerPlugin(tequila_url, service, request,
+    return TequilaChallengerPlugin(tequila_url, service, request, allows,
                                    rememberer_name, session_name,
                                    login_handler_path, logout_handler_path, logged_out_url)
