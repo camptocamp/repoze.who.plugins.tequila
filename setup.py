@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='repoze.who.plugins.tequila',
-      version='0.5',
+      version='0.5.1',
       author='Frederic Junod',
       author_email='frederic.junod@camptocamp.com',
       url='https://github.com/camptocamp/repoze.who.plugins.tequila',

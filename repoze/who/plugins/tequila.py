@@ -72,7 +72,7 @@ class TequilaChallengerPlugin(object):
             session = environ.get(self.session_name)
             if 'repoze.who.plugins.tequila' in session:
                 del session['repoze.who.plugins.tequila']
-                session.save
+                session.save()
             return []
 
     # IChallenger
