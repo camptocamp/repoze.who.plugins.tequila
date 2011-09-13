@@ -10,7 +10,7 @@ def tequila_request(url, action, data):
     except HTTPError:
         return None
 
-    body = response.read()
+    body = response.read().decode('utf-8')
     return dict([tuple(line.split('=', 1)) for line in body.split('\n') if line])
 
 class TequilaChallengerPlugin(object):
